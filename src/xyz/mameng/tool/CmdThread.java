@@ -7,10 +7,10 @@ import java.util.List;
 public class CmdThread implements Runnable{
 
     private String name;
-    private static List devices;
-    private static List flashing;
-    String filepath = "";
-    Cmd cmd = new Cmd();
+    private static List<String> devices;
+    private static List<String> flashing;
+    private static String filepath = "C:\\Users\\damon\\Desktop\\SQ29_UMSPOS_180823_01_S_U_To_UMSPOS_181013_01_S_P1_SS_U__MH_AB_SQ29_PATCH_M_SQ29_PATCH_M_OTA-TS.zip";
+    private Cmd cmd = new Cmd();
 
 
     public CmdThread(String name){
@@ -21,11 +21,11 @@ public class CmdThread implements Runnable{
     public void run() {
 
         if (name.equals("devices")){
-            devices = new ArrayList();
-            flashing = new ArrayList();
+            devices = new ArrayList<>();
+            flashing = new ArrayList<>();
             while (true){
                 String result = cmd.CMDCommand("adb devices");
-                List results = Arrays.asList(result.split("\n"));
+                List<String> results = Arrays.asList(result.split("\n"));
                 if (results.size()>1){
                     for (Object device : results){
                         if (device.toString().endsWith("device")){
@@ -53,6 +53,7 @@ public class CmdThread implements Runnable{
 
                 boolean isEmpty = devices.isEmpty();
                 if (isEmpty){
+                    System.out.println(Thread.currentThread().getName()+"：等待设备连接！");
                     this.sleep(2000);
                 }else{
                     String s = devices.get(devices.size()-1).toString();
@@ -83,16 +84,16 @@ public class CmdThread implements Runnable{
         //this.sleep(20000);
 
         /*刷机流程*/
-        cmd.CMDCommand("adb -s "+s+" push "+filepath);
+        cmd.CMDCommand("adb -s "+s+" push "+filepath+" /sdcard/");
         cmd.CMDCommand("adb -s "+s+" shell am start com.qualcomm.update/com.qualcomm.update.UpdateDialog");
         cmd.CMDCommand("adb -s "+s+" shell input tap 280 680");
         cmd.CMDCommand("adb -s "+s+" shell input tap 600 790");
-        cmd.CMDCommand("adb -s "+s+" shell sleep 3");
+        cmd.CMDCommand("adb -s "+s+" shell sleep 2");
         cmd.CMDCommand("adb -s "+s+" shell input keyevent 93");
         cmd.CMDCommand("adb -s "+s+" shell input keyevent 93");
         cmd.CMDCommand("adb -s "+s+" shell input keyevent 93");
         cmd.CMDCommand("adb -s "+s+" shell input tap 330 1040");
-        cmd.CMDCommand("adb -s "+s+" shell sleep 3");
+        cmd.CMDCommand("adb -s "+s+" shell sleep 2");
 
         //test
 //        cmd.CMDCommand("adb -s "+s+" shell input tap 130 780");
@@ -107,8 +108,6 @@ public class CmdThread implements Runnable{
 
     public static void main(String[] args) throws InterruptedException {
         new Thread(new CmdThread("devices")).start();
-        Thread.sleep(3000);
-        new Thread(new CmdThread("flash")).start();
         Thread.sleep(3000);
         new Thread(new CmdThread("flash")).start();
         Thread.sleep(3000);

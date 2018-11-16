@@ -9,7 +9,7 @@ public class CmdThread implements Runnable{
     private String name;
     private static List<String> devices;
     private static List<String> flashing;
-    private static String filepath = "C:\\Users\\damon\\Desktop\\SQ29_UMSPOS_180823_01_S_U_To_UMSPOS_181013_01_S_P1_SS_U__MH_AB_SQ29_PATCH_M_SQ29_PATCH_M_OTA-TS.zip";
+    private static String filepath = "";
     private Cmd cmd = new Cmd();
 
 
@@ -48,21 +48,22 @@ public class CmdThread implements Runnable{
 
             //选取最后一行的device进行操作，结束之后删除
             while (true){
-               // System.out.println(Thread.currentThread().getName()+"------等待设备连接。。。。");
+               // 每次循环延时1秒
                 this.sleep(1000);
-
                 boolean isEmpty = devices.isEmpty();
                 if (isEmpty){
                     System.out.println(Thread.currentThread().getName()+"：等待设备连接！");
                     this.sleep(2000);
                 }else{
                     String s = devices.get(devices.size()-1).toString();
+                    //判断s是否正在其他线程刷机
                     boolean isFlashing = flashing.contains(s);
                     if (!isFlashing){
+                        //开始刷机前将这台设备添加到正在刷机的列表，防止其他线程重复刷
                         flashing.add(s);
-
+                        //调用刷机
                         this.flash(s);
-
+                        //将这台设备从列表中移除
                         devices.remove(s);
                         flashing.remove(s);
                         //System.out.println("------------------断开后device数量："+devices.size());
@@ -79,9 +80,6 @@ public class CmdThread implements Runnable{
         //获取一下线程名称
         String threadName = Thread.currentThread().getName();
         System.out.println(threadName+":-----------------------------开始刷机："+s);
-
-
-        //this.sleep(20000);
 
         /*刷机流程*/
         cmd.CMDCommand("adb -s "+s+" push "+filepath+" /sdcard/");
